@@ -29,6 +29,14 @@
 		{
 			"Name": "RawInput",
 			"Enabled": true
+		},
+		{
+			"Name": "CineCameraSceneCapture",
+			"Enabled": true
+		},
+		{
+			"Name": "rclUE",
+			"Enabled": true
 		}
 	]
 }
