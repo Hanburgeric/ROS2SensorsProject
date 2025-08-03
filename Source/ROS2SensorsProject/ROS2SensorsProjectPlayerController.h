@@ -43,6 +43,7 @@ protected:
 	TSubclassOf<UROS2SensorsProjectUI> VehicleUIClass;
 
 	/** Pointer to the UI widget */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = UI)
 	TObjectPtr<UROS2SensorsProjectUI> VehicleUI;
 
 	
