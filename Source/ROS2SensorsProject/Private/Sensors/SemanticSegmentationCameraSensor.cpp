@@ -4,6 +4,7 @@
 #include "CineCameraComponent.h"
 
 // ROS2SensorsProject
+#include "Utils/MaterialUtils.h"
 #include "Sensors/SemanticLabelData.h"
 
 DEFINE_LOG_CATEGORY(LogSemanticSegmentationCameraSensor);
@@ -106,24 +107,15 @@ bool USemanticSegmentationCameraSensor::IsBaseSegmentationMaterialValid() const
 		return false;
 	}
 
-	// Get all parameters from the material that are textures
-	TMap<FMaterialParameterInfo, FMaterialParameterMetadata> MaterialTextureParameters{};
-	BaseSegmentationMaterial->GetAllParametersOfType(
-		EMaterialParameterType::Texture, MaterialTextureParameters
-	);
-
-	// Find the parameter with a name matching the one set in LUTParameterName
-	bool bFoundLUTParameter{ false };
-	for (const auto& TextureParameter : MaterialTextureParameters)
-	{
-		if (TextureParameter.Key.Name == LUTParameterName)
-		{
-			bFoundLUTParameter = true;
-			break;
-		}
-	}
-
-	// No matching parameter found, log and return failure
+	// Find a texture parameter with a name matching
+	// the one set in LUTParameterName
+	bool bFoundLUTParameter{
+		UMaterialUtils::DoesMaterialHaveParameter(
+			BaseSegmentationMaterial,
+			EMaterialParameterType::Texture,
+			LUTParameterName
+		)
+	};
 	if (!bFoundLUTParameter)
 	{
 		UE_LOG(
@@ -137,24 +129,15 @@ bool USemanticSegmentationCameraSensor::IsBaseSegmentationMaterialValid() const
 		return false;
 	}
 
-	// Get all parameters from the material that are scalars
-	TMap<FMaterialParameterInfo, FMaterialParameterMetadata> MaterialScalarParameters{};
-	BaseSegmentationMaterial->GetAllParametersOfType(
-		EMaterialParameterType::Scalar, MaterialScalarParameters
-	);
-
-	// Find the parameter with a name matching the one set in LUTInvWidthParameterName
-	bool bFoundLUTInvWidthParameter{ false };
-	for (const auto& ScalarParameter : MaterialScalarParameters)
-	{
-		if (ScalarParameter.Key.Name == LUTInvWidthParameterName)
-		{
-			bFoundLUTInvWidthParameter = true;
-			break;
-		}
-	}
-
-	// No matching parameter found, log and return failure
+	// Find a scalar parameter with a name matching
+	// the one set in LUTInvWidthParameterName
+	bool bFoundLUTInvWidthParameter{
+		UMaterialUtils::DoesMaterialHaveParameter(
+			BaseSegmentationMaterial,
+			EMaterialParameterType::Scalar,
+			LUTInvWidthParameterName
+		)
+	};
 	if (!bFoundLUTInvWidthParameter)
 	{
 		UE_LOG(
@@ -196,33 +179,45 @@ void USemanticSegmentationCameraSensor::InitializeSemanticSegmentation()
 
 UTexture2D* USemanticSegmentationCameraSensor::CreateLUTFromSemanticLabels()
 {
-	UTexture2D* LUT = NewObject<UTexture2D>(this);
+	UTexture2D* LUT{ NewObject<UTexture2D>(this) };
 
-	const int32 Width = SemanticLabels->SemanticLabels.Num();
-	const int32 Height = 1;
+	// Set LOD group as a color lookup table;
+	// prevents compression and mip generation
+	LUT->LODGroup = TEXTUREGROUP_ColorLookupTable;
 
-	LUT->CompressionSettings = TC_VectorDisplacementmap;
+	// Disable gamma correction, as the LUT is data,
+	// not color for display; they must be in linear space
 	LUT->SRGB = false;
-	LUT->Filter = TF_Nearest;
-	LUT->NeverStream = true;
-	LUT->MipGenSettings = TMGS_NoMipmaps;
-	LUT->LODGroup = TEXTUREGROUP_Pixels2D;
-	LUT->AddressX = TA_Clamp;
-	LUT->AddressY = TA_Clamp;
 
+	// Do not blend adjacent pixels, as this would mix colors
+	// from different semantic labels
+	LUT->Filter = TF_Nearest;
+
+	// Initialize texture
+	const int32 Width{ SemanticLabels->SemanticLabels.Num() };
+	const int32 Height{ 1 };
 	LUT->Source.Init(Width, Height, 1, 1, TSF_BGRA8);
 
-	uint8* RawPtr = LUT->Source.LockMip(0);
-	for (int32 x = 0; x < Width; ++x)
+	// Edit the texture
+	uint8* MipData{ LUT->Source.LockMip(0) };
+	for (int32 x{ 0 }; x < Width; ++x)
 	{
-		const FColor& C = SemanticLabels->SemanticLabels[x].ConvertedColor;
-		RawPtr[4 * x + 0] = C.B;
-		RawPtr[4 * x + 1] = C.G;
-		RawPtr[4 * x + 2] = C.R;
-		RawPtr[4 * x + 3] = C.A;
+		// Get the color corresponding to the semantic label
+		// at the current texture index
+		const FColor& PixelColor{
+			SemanticLabels->SemanticLabels[x].ConvertedColor
+		};
+
+		// Write the color to the texture data (4 bytes per pixel)
+		const int32 MipDataIndex{ x * 4 };
+		MipData[MipDataIndex + 0] = PixelColor.B;
+		MipData[MipDataIndex + 1] = PixelColor.G;
+		MipData[MipDataIndex + 2] = PixelColor.R;
+		MipData[MipDataIndex + 3] = PixelColor.A;
 	}
 	LUT->Source.UnlockMip(0);
 
+	// Update the texture
 	LUT->UpdateResource();
 
 	return LUT;
