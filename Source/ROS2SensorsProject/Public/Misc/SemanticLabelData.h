@@ -4,7 +4,6 @@
 #include "Engine/DataAsset.h"
 #include "SemanticLabelData.generated.h"
 
-
 USTRUCT(BlueprintType)
 struct FSemanticLabel
 {

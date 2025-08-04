@@ -4,8 +4,8 @@
 #include "CineCameraComponent.h"
 
 // ROS2SensorsProject
+#include "Misc/SemanticLabelData.h"
 #include "Utils/MaterialUtils.h"
-#include "Sensors/SemanticLabelData.h"
 
 DEFINE_LOG_CATEGORY(LogSemanticSegmentationCameraSensor);
 
