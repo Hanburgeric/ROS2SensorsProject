@@ -1,7 +1,6 @@
 #include "Sensors/LiDARSensor.h"
 
-ULiDARSensor::ULiDARSensor(const FObjectInitializer& ObjectInitializer)
-	: Super{ ObjectInitializer }
+ULiDARSensor::ULiDARSensor()
 {
 }
 

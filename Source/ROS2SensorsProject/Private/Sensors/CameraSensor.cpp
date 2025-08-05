@@ -7,10 +7,9 @@
 
 DEFINE_LOG_CATEGORY(LogCameraSensor);
 
-UCameraSensor::UCameraSensor(const FObjectInitializer& ObjectInitializer)
-	: Super{ ObjectInitializer }
-	, CameraComponent{ ObjectInitializer.CreateDefaultSubobject<UCineCameraComponent>(this, TEXT("CameraComponent")) }
-	, CaptureComponent{ ObjectInitializer.CreateDefaultSubobject<UCineCaptureComponent2D>(this, TEXT("CaptureComponent")) }
+UCameraSensor::UCameraSensor()
+	: CameraComponent{ CreateDefaultSubobject<UCineCameraComponent>(TEXT("CameraComponent")) }
+	, CaptureComponent{ CreateDefaultSubobject<UCineCaptureComponent2D>(TEXT("CaptureComponent")) }
 {
 	// Attach camera to the sensor such that it inherits the sensor's transform
 	CameraComponent->SetupAttachment(this);

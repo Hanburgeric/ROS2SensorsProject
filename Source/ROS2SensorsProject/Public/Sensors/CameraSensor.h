@@ -16,7 +16,7 @@ class ROS2SENSORSPROJECT_API UCameraSensor : public USceneComponent
 	GENERATED_BODY()
 
 public:
-	UCameraSensor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UCameraSensor();
 
 protected:
 	virtual void BeginPlay() override;

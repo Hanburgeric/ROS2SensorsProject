@@ -9,8 +9,7 @@
 
 DEFINE_LOG_CATEGORY(LogSemanticSegmentationCameraSensor);
 
-USemanticSegmentationCameraSensor::USemanticSegmentationCameraSensor(const FObjectInitializer& ObjectInitializer)
-	: Super{ ObjectInitializer }
+USemanticSegmentationCameraSensor::USemanticSegmentationCameraSensor()
 {
 }
 

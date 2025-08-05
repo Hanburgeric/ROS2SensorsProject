@@ -15,7 +15,7 @@ class ROS2SENSORSPROJECT_API USemanticSegmentationCameraSensor : public UCameraS
 	GENERATED_BODY()
 	
 public:
-	USemanticSegmentationCameraSensor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	USemanticSegmentationCameraSensor();
 
 protected:
 	virtual void BeginPlay() override;
