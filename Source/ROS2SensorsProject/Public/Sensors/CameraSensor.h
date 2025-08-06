@@ -25,6 +25,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCineCameraComponent> CameraComponent{ nullptr };
 
-	UPROPERTY(VisibleAnywhere, BlueprintREadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UCineCaptureComponent2D> CaptureComponent{ nullptr };
 };
